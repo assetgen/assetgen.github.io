@@ -3,10 +3,10 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="description" content="Emu3D: Text-to-Mesh Generation with High-Quality Geometry, Texture, and PBR Materials">
-    <meta name="keywords" content="Emu3D, Generative Models, LRM, Diffusion Models">
+    <meta name="description" content="Meta 3D AssetGen: Text-to-Mesh Generation with High-Quality Geometry, Texture, and PBR Materials">
+    <meta name="keywords" content="Meta 3D AssetGen, Generative Models, LRM, Diffusion Models">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Emu3D</title>
+    <title>Meta 3D AssetGen</title>
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
     <link rel="stylesheet" href="./static/css/bulma.min.css">
@@ -60,7 +60,7 @@
             <div class="container is-max-desktop">
                 <div class="columns is-centered">
                     <div class="column has-text-centered">
-                        <h1 class="title is-1 publication-title">Emu3D: Text-to-Mesh Generation with High-Quality Geometry, Texture, and PBR Materials</h1>
+                        <h1 class="title is-1 publication-title">Meta 3D AssetGen: Text-to-Mesh Generation with High-Quality Geometry, Texture, and PBR Materials</h1>
                         <div class="is-size-5 publication-authors">
                             <span class="author-block">
                                 <a href="https://nihalsid.github.io/" target="_blank">Yawar Siddiqui</a><sup>1</sup>,</span>
@@ -94,7 +94,7 @@
                             <div class="publication-links">
                                 <!-- PDF Link. -->
                                 <span class="link-block">
-                                    <a href="static/Emu3D.pdf" class="external-link button is-normal is-rounded is-dark" target="_blank">
+                                    <a href="static/AssetGen.pdf" class="external-link button is-normal is-rounded is-dark" target="_blank">
                                         <span class="icon">
                                             <i class="fas fa-file-pdf"></i>
                                         </span>
@@ -114,7 +114,7 @@
             <div class="hero-body">
                 <img src="./static/teaser/teaser.jpg" height="100%" />
                 <h2 class=" subtitle has-text-centered" style="padding-top: 0px;">
-                    We introduce <span class="dnerf">Emu3D</span>, a novel text- or image-conditioned generator of 3D assets with Physically Based Rendering (PBR) materials. Its image-to-3D stage, <span class="dnerf">EmuLRM</span>, outputs high-quality 3D geometry and texture via a novel SDF-based reconstructor coupled with a lightweight texture refinement module. The text-to-image stage includes a novel albedo-shaded 4-view generator, enhancing <span class="dnerf">EmuLRM</span>'s PBR decomposition capabilities. With PBR decomposition, the assets avoid baked-in lighting in the albedo, allowing them to be relit in novel environments.
+                    We introduce <span class="dnerf">Meta 3D AssetGen</span>, a novel text- or image-conditioned generator of 3D assets with physically-based rendering materials (top). <span class="dnerf">Meta 3D AssetGen</span> roduces meshes with detailed geometry and high-fidelity textures, and decomposes materials into albedo, metalness, and roughness (bottom left), which allows to realistically relight objects in new environments (bottom right).
                 </h2>
             </div>
         </div>
@@ -202,7 +202,7 @@
                     <h2 class="title is-3">Abstract</h2>
                     <div class="content has-text-justified">
                         <p>
-                            3D generative AI has enormous potential for industry, but its quality remains insufficient for professional use. We present <span class="dnerf">Emu3D</span>, a significant advancement in text-to-3D which produces faithful, high-quality meshes with full material control. Compared to prior works that bake shading in the 3D object, we output physically-based rendering (PBR) materials, supporting realistic relighting. <span class="dnerf">Emu3D</span> generates first several views of the object with factored shaded and albedo, and then reconstructs colours, metalness and roughness in 3D, training the reconstruction network via a deferred shading loss. The latter models shape more reliably by outputting directly a sign-distance function and using a corresponding loss, which, implemented in fused kernels, are highly memory efficient. After mesh extraction, a final texture refinement step operating in UV space significantly improves sharpness and details. Emu3D achieves 17% improvement in Chamfer Distance and 40% in LPIPS over the best concurrent work for few-view reconstruction, and a human preference of 72% over the best industry text-to-3D tool, including those that support PBR, with comparable inference time.
+                            We present <span class="dnerf">Meta 3D AssetGen (AssetGen)</span>, a significant advancement in text-to-3D generation which produces faithful, high-quality meshes with texture and material control. Compared to works that bake shading in the 3D object’s appearance, <span class="dnerf">AssetGen</span> outputs physically-based rendering (PBR) materials, supporting realistic relighting. <span class="dnerf">AssetGen</span> generates first several views of the object with factored shaded and albedo appearance channels, and then reconstructs colours, metalness and roughness in 3D, using a deferred shading loss for efficient supervision. It also uses a sign-distance function to represent 3D shape more reliably and introduces a corresponding loss for direct shape supervision. This is implemented using fused kernels for high memory efficiency. After mesh extraction, a texture refinement transformer operating in UV space significantly improves sharpness and details. <span class="dnerf">AssetGen</span> achieves 17% improvement in Chamfer Distance and 40% in LPIPS over the best concurrent work for few-view reconstruction, and a human preference of 72% over the best industry competitors of comparable speed, including those that support PBR.
                         </p>
                     </div>
                 </div>
@@ -227,7 +227,7 @@
                     <h2 class="title is-4">Relightability of Assets</h2>
                     <div class="content has-text-justified">
                         <p>
-                            <span class="dnerf">Emu3D</span> is able to generate assets with varying material properties, which allows faithful modelling of the interaction between the object surface as the environment lighting changes. Here, we show assets generated with the prompt "A cat made of MATERIAL".
+                            <span class="dnerf">Meta 3D AssetGen</span> is able to generate assets with varying material properties, which allows faithful modelling of the interaction between the object surface as the environment lighting changes. Here, we show assets generated with the prompt "A cat made of MATERIAL".
                         </p>
                     </div>
                     <div class="columns is-centered">
@@ -291,10 +291,10 @@
                     <h2 class="title is-4">Method Overview</h2>
                     <img src="./static/teaser/overview.jpg" />
                     <div class="content has-text-justified" style="padding-top: 15px">
-                        <span class="dnerf">Emu3D</span> is a two-stage generator of 3D assets with PBR materials.
-                        The first text-to-image stage generates a 6-channel 4-view grid depicting the shaded and albedo object texture.
-                        The second image-to-3D stage (dubbed <span class="dnerf">EmuLRM</span>) outputs a triplane-supported SDF field which is later meshed.
-                        Finally, a texture-refinement deep UNet backprojects the 4-view texture onto the mesh.
+                        Given a text prompt, <span class="dnerf">AssetGen</span> generates a 3D mesh with PBR materials in two stages.
+                        The first text-to-image stage (blue) predicts a 6-channel image depicting 4 views of the object with shaded and albedo colors. The second image-to-3D stage includes two steps. First, a 3D
+                        reconstructor (dubbed <span class="dnerf">MetaILRM</span>) outputs a triplane-supported SDF field converted into a mesh with textured PBR materials (orange). Then, PBR materials are enhanced with our texture refiner which
+                        recovers missing details from the input views (green).
                     </div>
                 </div>
             </div>
@@ -340,7 +340,7 @@
     <footer class="footer">
         <div class="container">
             <div class="content has-text-centered">
-                <a class="icon-link" href="static/Emu3D.pdf">
+                <a class="icon-link" href="static/AssetGen.pdf">
                     <i class="fas fa-file-pdf"></i>
                 </a>
                 <a class="icon-link" href="https://github.com/nihalsid" class="external-link" disabled>
