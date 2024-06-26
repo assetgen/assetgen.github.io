@@ -1,3 +1,844 @@
+<!DOCTYPE html>
 <html>
-  <body>Hello World!</body>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="Emu3D: Text-to-Mesh Generation with High-Quality Geometry, Texture, and PBR Materials">
+    <meta name="keywords" content="Emu3D, Generative Models, LRM, Diffusion Models">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Emu3D</title>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+    <link rel="stylesheet" href="./static/css/bulma.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <link rel="stylesheet" href="./static/css/index.css">
+    <style>
+        .render_wrapper {
+            position: relative;
+            height: 300px;
+         }
+        .render_wrapper_small {
+            position: relative;
+            height: 200px;
+         }
+        .render_div {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .render_text {
+            width: 100%;
+            height: 100%;
+            display: block;
+            font-size: medium;
+            padding: 10px;
+            text-align: center;
+        }
+
+        #interpolation-image-wrapper-car{
+            text-align: center;
+        }
+        #interpolation-image-wrapper-chair{
+            text-align: center;
+        }
+        .nested-columns {
+            margin-bottom: 0 !important;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script defer src="./static/js/fontawesome.all.min.js"></script>
+    <script src="./static/js/bulma-carousel.min.js"></script>
+    <script src="./static/js/bulma-slider.min.js"></script>
+    <script src="./static/js/index.js"></script>
+</head>
+
+<body>
+    <section class="hero">
+        <div class="hero-body">
+            <div class="container is-max-desktop">
+                <div class="columns is-centered">
+                    <div class="column has-text-centered">
+                        <h1 class="title is-1 publication-title">Emu3D: Text-to-Mesh Generation with High-Quality Geometry, Texture, and PBR Materials</h1>
+                        <div class="is-size-5 publication-authors">
+                            <span class="author-block">
+                                <a href="https://nihalsid.github.io/" target="_blank">Yawar Siddiqui</a><sup>1</sup>,</span>
+                            <span class="author-block">
+                                <a href="https://www.tmonnier.com/" target="_blank">Tom Monnier</a><sup>*2</sup>,</span>
+                            <span class="author-block">
+                                <a href="https://fkokkinos.github.io/" target="_blank">Filippos Kokkinos</a><sup>*2</sup>,</span>
+                            <span class="author-block">
+                                <a href="https://uk.linkedin.com/in/mahendrakariya" target="_blank">Mahendra Kariya</a><sup>2</sup>,</span>
+                            <span class="author-block">
+                                <a href="https://www.yanirk.com/" target="_blank">Yanir Kleiman</a><sup>2</sup>,</span>
+                            <span class="author-block">
+                                <a href="https://fr.linkedin.com/in/emilien-garreau-b87606ab/en" target="_blank">Emilien Garreau</a><sup>2</sup>,</span>
+                            <span class="author-block">
+                                <a href="https://ai.meta.com/people/218463647991453/oran-gafni/" target="_blank">Oran Gafni</a><sup>2</sup>,</span>
+                            <span class="author-block">
+                                <a href="https://uk.linkedin.com/in/natalia-neverova-14066133" target="_blank">Natalia Neverova</a><sup>2</sup>,</span>
+                            <span class="author-block">
+                                <a href="https://www.robots.ox.ac.uk/~vedaldi/" target="_blank">Andrea Vedaldi</a><sup>2</sup>,</span>
+                            <span class="author-block">
+                                <a href="https://www.shapovalov.ro/" target="_blank">Roman Shapovalov</a><sup>*2</sup>,</span>
+                            <span class="author-block">
+                                <a href="https://d-novotny.github.io/" target="_blank">David Novotny</a><sup>*2</sup></span>
+                        </div>
+                        <div class="is-size-5 publication-authors">
+                            <span class="author-block"><sup>1</sup>Technical University of Munich,</span>
+                            <span class="author-block"><sup>2</sup>GenAI, Meta,</span>
+                            <span class="author-block"><sup>*</sup>Equal Core Contributors</span>
+                        </div>
+                        <div class="column has-text-centered">
+                            <div class="publication-links">
+                                <!-- PDF Link. -->
+                                <span class="link-block">
+                                    <a href="static/Emu3D.pdf" class="external-link button is-normal is-rounded is-dark" target="_blank">
+                                        <span class="icon">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </span>
+                                        <span>Paper</span>
+                                    </a>
+                                </span>
+                                <span class="link-block"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="hero teaser" style="margin-top: -30px;">
+        <div class="container is-max-desktop">
+            <div class="hero-body">
+                <img src="./static/teaser/teaser.jpg" height="100%" />
+                <h2 class=" subtitle has-text-centered" style="padding-top: 0px;">
+                    We introduce <span class="dnerf">Emu3D</span>, a novel text- or image-conditioned generator of 3D assets with Physically Based Rendering (PBR) materials. Its image-to-3D stage, <span class="dnerf">EmuLRM</span>, outputs high-quality 3D geometry and texture via a novel SDF-based reconstructor coupled with a lightweight texture refinement module. The text-to-image stage includes a novel albedo-shaded 4-view generator, enhancing <span class="dnerf">EmuLRM</span>'s PBR decomposition capabilities. With PBR decomposition, the assets avoid baked-in lighting in the albedo, allowing them to be relit in novel environments.
+                </h2>
+            </div>
+        </div>
+    </section>
+    <section class="hero is-light is-small">
+        <div class="hero-body">
+            <div class="container">
+                <div id="results-carousel-0" class="carousel results-carousel">
+                    <div class="item item-steve">
+                        <div class="render_wrapper">
+                            <div id="mesh_tt3d_0" class="render_div"></div>
+                        </div>
+                        <div style="height: 50px;">
+                            <span class="render_text"> "A red-eyed tree frog" </span>
+                        </div>
+                    </div>
+                    <div class="item item-steve">
+                        <div class="render_wrapper">
+                            <div id="mesh_tt3d_1" class="render_div"></div>
+                        </div>
+                        <div style="height: 50px;">
+                            <span class="render_text"> "A wedge of cheese on a silver platter" </span>
+                        </div>
+                    </div>
+                    <div class="item item-steve">
+                        <div class="render_wrapper">
+                            <div id="mesh_tt3d_2" class="render_div"></div>
+                        </div>
+                        <div style="height: 50px;">
+                            <span class="render_text"> "A train engine made out of clay" </span>
+                        </div>
+                    </div>
+                    <div class="item item-steve">
+                        <div class="render_wrapper">
+                            <div id="mesh_tt3d_3" class="render_div"></div>
+                        </div>
+                        <div style="height: 50px;">
+                            <span class="render_text"> "A metallic pug" </span>
+                        </div>
+                    </div>
+                </div>
+                <div id="results-carousel-1" class="carousel results-carousel">
+                    <div class="item item-steve">
+                        <div class="render_wrapper">
+                            <div id="mesh_tt3d_4" class="render_div"></div>
+                        </div>
+                        <div style="height: 50px;">
+                            <span class="render_text"> "A marble bust of a mouse" </span>
+                        </div>
+                    </div>
+                    <div class="item item-steve">
+                        <div class="render_wrapper">
+                            <div id="mesh_tt3d_5" class="render_div"></div>
+                        </div>
+                        <div style="height: 50px;">
+                            <span class="render_text"> "A toilet made out of gold" </span>
+                        </div>
+                    </div>
+                    <div class="item item-steve">
+                        <div class="render_wrapper">
+                            <div id="mesh_tt3d_6" class="render_div"></div>
+                        </div>
+                        <div style="height: 50px;">
+                            <span class="render_text"> "A colorful mushroom growing on a log" </span>
+                        </div>
+                    </div>
+                    <div class="item item-steve">
+                        <div class="render_wrapper">
+                            <div id="mesh_tt3d_7" class="render_div"></div>
+                        </div>
+                        <div style="height: 50px;">
+                            <span class="render_text"> "A bichon frise in academic regalia" </span>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 20px;" id="message-help">Press <b>G</b> to toggle between geometry and textured meshes. Press <b>R</b> to reset the view. </div>
+            </div>
+        </div>
+    </section>
+    <section class="section">
+        <div class="container is-max-desktop">
+            <!-- Abstract. -->
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-four-fifths">
+                    <h2 class="title is-3">Abstract</h2>
+                    <div class="content has-text-justified">
+                        <p>
+                            3D generative AI has enormous potential for industry, but its quality remains insufficient for professional use. We present <span class="dnerf">Emu3D</span>, a significant advancement in text-to-3D which produces faithful, high-quality meshes with full material control. Compared to prior works that bake shading in the 3D object, we output physically-based rendering (PBR) materials, supporting realistic relighting. <span class="dnerf">Emu3D</span> generates first several views of the object with factored shaded and albedo, and then reconstructs colours, metalness and roughness in 3D, training the reconstruction network via a deferred shading loss. The latter models shape more reliably by outputting directly a sign-distance function and using a corresponding loss, which, implemented in fused kernels, are highly memory efficient. After mesh extraction, a final texture refinement step operating in UV space significantly improves sharpness and details. Emu3D achieves 17% improvement in Chamfer Distance and 40% in LPIPS over the best concurrent work for few-view reconstruction, and a human preference of 72% over the best industry text-to-3D tool, including those that support PBR, with comparable inference time.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- Paper video. -->
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-four-fifths">
+                    <h2 class="title is-3">Video</h2>
+                    <div class="publication-video">
+                        <iframe src="https://www.youtube.com/embed/PHxR_pX0UhE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+            <!--/ Paper video. -->
+        </div>
+    </section>
+    <section class="section">
+        <div class="container is-max-desktop">
+            <!-- Novel datasets. -->
+            <div class="columns is-centered" id="results-relight" style="margin-top: -50px">
+                <div class="column is-full-width">
+                    <h2 class="title is-4">Relightability of Assets</h2>
+                    <div class="content has-text-justified">
+                        <p>
+                            <span class="dnerf">Emu3D</span> is able to generate assets with varying material properties, which allows faithful modelling of the interaction between the object surface as the environment lighting changes. Here, we show assets generated with the prompt "A cat made of MATERIAL".
+                        </p>
+                    </div>
+                    <div class="columns is-centered">
+                        <div class="column is-2">
+                            <div class="buttons is-centered" style="height: 100%">
+                                <button class="button" id="style_button_0" style="font-weight: 500; background-color: #e2dede; color: #030202">Environment 1</button>
+                                <button class="button" id="style_button_1" style="font-weight: 500; background-color: #76b3d7; color: #0a0a0a">Environment 2</button>
+                                <button class="button" id="style_button_2" style="font-weight: 500; background-color: #eaa351; color: #0a0a0a">Environment 3</button>
+                            </div>
+                        </div>
+                        <div class="column" style="background-color: #f5f5f5; margin-left: -5px;">
+                            <div class="item item-steve">
+                                <div class="render_wrapper_small">
+                                    <div id="mesh_env_0" class="render_div"></div>
+                                </div>
+                                <div style="height: 30px;">
+                                    <span class="render_text"> Shiny Plastic </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column" style="background-color: #f5f5f5; margin-left: 5px;">
+                            <div class="item item-steve">
+                                <div class="render_wrapper_small">
+                                    <div id="mesh_env_1" class="render_div"></div>
+                                </div>
+                                <div style="height: 30px;">
+                                    <span class="render_text"> Rock </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column" style="background-color: #f5f5f5; margin-left: 5px;">
+                            <div class="item item-steve">
+                                <div class="render_wrapper_small">
+                                    <div id="mesh_env_2" class="render_div"></div>
+                                </div>
+                                <div style="height: 30px;">
+                                    <span class="render_text"> Shiny Silver </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column" style="background-color: #f5f5f5; margin-left: 5px;">
+                            <div class="item item-steve">
+                                <div class="render_wrapper_small">
+                                    <div id="mesh_env_3" class="render_div"></div>
+                                </div>
+                                <div style="height: 30px;">
+                                    <span class="render_text"> Rusted Iron </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content" style="text-align: center">
+                        [ Press <b>G</b> to toggle between geometry and textured meshes. Press <b>R</b> to reset the view. ]
+                    </div>
+                </div>
+            </div>
+            <!--/ Animation. -->
+            <!-- Overview. -->
+            <div class="columns is-centered" style="margin-top: 15px">
+                <div class="column is-full-width">
+                    <h2 class="title is-4">Method Overview</h2>
+                    <img src="./static/teaser/overview.jpg" />
+                    <div class="content has-text-justified" style="padding-top: 15px">
+                        <span class="dnerf">Emu3D</span> is a two-stage generator of 3D assets with PBR materials.
+                        The first text-to-image stage generates a 6-channel 4-view grid depicting the shaded and albedo object texture.
+                        The second image-to-3D stage (dubbed <span class="dnerf">EmuLRM</span>) outputs a triplane-supported SDF field which is later meshed.
+                        Finally, a texture-refinement deep UNet backprojects the 4-view texture onto the mesh.
+                    </div>
+                </div>
+            </div>
+            <!-- Concurrent Work. -->
+            <div class="columns is-centered">
+                <div class="column is-full-width">
+                    <h2 class="title is-3">Related Links</h2>
+                    <div class="content has-text-justified">
+                        <p>
+                            For more work on similar tasks, please check out
+                        </p>
+                        <p>
+                            <a href="https://arxiv.org/abs/2403.14621">Gaussian Reconstruction Model</a> presents a fast, transformer-based model for efficient 3D reconstruction and generation using pixel-aligned Gaussians.
+                        </p>
+                        <p>
+                            <a href="https://arxiv.org/abs/2404.07191">InstantMesh</a> introduces a fast, efficient framework for generating high-quality 3D meshes from a single image using a multi-view diffusion model and sparse-view large reconstruction.
+                        </p>
+                        <p>
+                            <a href="https://arxiv.org/abs/2404.12385">MeshLRM</a> introduces a fast, efficient model for generating high-quality 3D meshes from just four input images using differentiable mesh extraction.
+                        </p>
+                        <p>
+                            <a href="https://arxiv.org/abs/2311.06214">Instant3D</a>, the original pioneering feed-forward method for generating high-quality and diverse 3D assets from text prompts using a two-stage approach: generating four-view images with a fine-tuned diffusion model and reconstructing a NeRF with a transformer-based sparse-view reconstructor.
+                        </p>
+                        <p>
+                            <a href="https://lightplane.github.io/">LightplaneLRM</a> add highly scalable splatting and rendering kernels to Instant3D's large reconstruction model, improving performance.
+                        </p>
+                        <p>
+                            <a href="https://lumalabs.ai/genie?view=create">LumaAI Genie</a> and <a href="https://www.meshy.ai/">Meshy 3</a> are commercial softwares for creating relightable assets from text prompts.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!--/ Concurrent Work. -->
+        </div>
+    </section>
+    <section class="section" style="margin-top: -50px;" id="BibTeX">
+        <div class="container is-max-desktop content">
+            <h2 class="title">BibTeX</h2>
+            <pre>
+                <code>To be added</code></pre>
+        </div>
+    </section>
+    <footer class="footer">
+        <div class="container">
+            <div class="content has-text-centered">
+                <a class="icon-link" href="static/Emu3D.pdf">
+                    <i class="fas fa-file-pdf"></i>
+                </a>
+                <a class="icon-link" href="https://github.com/nihalsid" class="external-link" disabled>
+                    <i class="fab fa-github"></i>
+                </a>
+            </div>
+            <div class="columns is-centered">
+                <div class="column is-8">
+                    <div class="content">
+                        <p style="text-align:center">
+                            Source code mainly borrowed from <a href="https://keunhong.com/">Keunhong Park</a>'s <a href="https://nerfies.github.io/">Nerfies website</a> and Yawar Siddiqui's <a href="https://nihalsid.github.io/texturify/">Texturify</a> webpage.
+                        </p>
+                        <p style="text-align:center">
+                            Please contact <a href="https://nihalsid.github.io">Yawar Siddiqui</a> for feedback and questions.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- Import maps polyfill -->
+    <!-- Remove this when import maps will be widely supported -->
+    <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "./js/three.module.js"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+
+        import { PLYLoader } from './js/PLYLoader.js';
+        import { GLTFLoader } from './js/GLTFLoader.js';
+        import { RGBELoader } from './js/RGBELoader.js';
+        import { OrbitControls } from './js/OrbitControls.js'
+        let div_to_scene = {
+            "mesh_tt3d_0": {
+                "geo": null,
+                "color": null,
+            },
+            "mesh_tt3d_1": {
+                "geo": null,
+                "color": null,
+            },
+            "mesh_tt3d_2": {
+                "geo": null,
+                "color": null,
+            },
+            "mesh_tt3d_3": {
+                "geo": null,
+                "color": null,
+            },
+            "mesh_tt3d_4": {
+                "geo": null,
+                "color": null,
+            },
+            "mesh_tt3d_5": {
+                "geo": null,
+                "color": null,
+            },
+            "mesh_tt3d_6": {
+                "geo": null,
+                "color": null,
+            },
+            "mesh_tt3d_7": {
+                "geo": null,
+                "color": null,
+            }
+        }
+        let div_to_render_scene = {
+            "mesh_env_0": {
+                "0": null,
+                "1": null,
+                "2": null,
+                "geo": null,
+            },
+            "mesh_env_1": {
+                "0": null,
+                "1": null,
+                "2": null,
+                "geo": null,
+            },
+            "mesh_env_2": {
+                "0": null,
+                "1": null,
+                "2": null,
+                "geo": null,
+            },
+            "mesh_env_3": {
+                "0": null,
+                "1": null,
+                "2": null,
+                "geo": null,
+            },
+        }
+        let mouse_button_down = false;
+        let list_of_orbit_controls = []
+        let style_camera = null;
+        let render_colors = true;
+        let style_id = "0"
+
+        function setup_camera(div_name){
+            let container = document.getElementById(div_name);
+            let width = container.parentElement.clientWidth;
+            let height = container.parentElement.clientHeight;
+            console.log(width, height)
+            let camera = new THREE.PerspectiveCamera( 35, width / height, 0.1, 50 );
+            let camera_init_position = new THREE.Vector3( 1.0, 0.35, 1.2 );
+            if (div_name.includes("tt3d_3") || div_name.includes("tt3d_4") || div_name.includes("tt3d_5") || div_name.includes("tt3d_6") || div_name.includes("tt3d_7") ){
+                camera_init_position = camera_init_position.multiplyScalar(1.5 * 7.5)
+            }
+            else if (div_name.includes("env")) {
+                camera_init_position = camera_init_position.multiplyScalar(1.5 * 6.75)
+            }
+            else {
+                camera_init_position = camera_init_position.multiplyScalar(1.5 * 6)
+            }
+            camera.position.set(camera_init_position.x, camera_init_position.y, camera_init_position.z);
+            return camera;
+        }
+
+        function setup_render_divs(div_name, mesh_path){
+            const container = document.getElementById(div_name);
+            const placeholder = document.createElement('div');
+            placeholder.textContent = "Loading..."; 
+            container.appendChild(placeholder);
+
+            const observer = new IntersectionObserver(entries => {
+                if (entries[0].isIntersecting) {
+                    observer.unobserve(placeholder); // Stop observing once loaded
+                    placeholder.remove(); 
+
+                    let camera = setup_camera(div_name)
+                    let orbit_control = create_render_div(camera, div_name, mesh_path)
+                    list_of_orbit_controls.push(orbit_control)
+                }
+            });
+            observer.observe(placeholder);
+        }
+
+        function setup_style_render_divs(div_name, mesh_path){
+            const container = document.getElementById(div_name);
+            const placeholder = document.createElement('div');
+            placeholder.textContent = "Loading..."; 
+            container.appendChild(placeholder);
+
+            const observer = new IntersectionObserver(entries => {
+                if (entries[0].isIntersecting) {
+                    observer.unobserve(placeholder); // Stop observing once loaded
+                    placeholder.remove(); 
+
+                    if (style_camera == null) {
+                        style_camera = setup_camera(div_name)
+                    }
+                    let orbit_control = create_style_render_div(style_camera, div_name, mesh_path, true)
+                    list_of_orbit_controls.push(orbit_control)
+                    document.getElementById("style_button_0").addEventListener("click", set_style_0)
+                    document.getElementById("style_button_1").addEventListener("click", set_style_1)
+                    document.getElementById("style_button_2").addEventListener("click", set_style_2)
+                }
+            });
+            observer.observe(placeholder);
+        }
+
+        function create_render_div(camera, div_id, mesh_path) {
+            let container;
+            let renderer, controls;
+
+            init();
+            animate();
+
+            function init() {
+
+                container = document.getElementById(div_id);
+                let width = container.parentElement.clientWidth;
+                let height = container.parentElement.clientHeight;
+
+
+                div_to_scene[div_id]["color"] = new THREE.Scene();
+                div_to_scene[div_id]["geo"] = new THREE.Scene();
+                div_to_scene[div_id]["color"].background = new THREE.Color( 0xffffff );
+                div_to_scene[div_id]["geo"].background = new THREE.Color( 0xffffff );
+
+                // PLY file
+
+                const loader = new GLTFLoader();
+                loader.load(mesh_path, function (geometry) {
+
+                    let loaded_mesh = geometry.scene
+
+                    const axis = new THREE.Vector3(0, 1, 0); // Rotate around the Y axis
+                    const angle = Math.PI / 2; // 45 degrees rotation
+                    loaded_mesh.rotateOnAxis(axis, angle);
+
+                    div_to_scene[div_id]["color"].add(loaded_mesh);
+                    
+                    loaded_mesh.traverse(function (child) {
+                        if (child.isMesh) {
+                            const geometry = child.geometry;
+                            const material = new THREE.MeshStandardMaterial( { color: 0x444444, flatShading: true } )
+                            const mesh = new THREE.Mesh(geometry, material);
+                            mesh.rotateOnAxis(axis, angle);
+                            div_to_scene[div_id]["geo"].add(mesh);
+                        }
+                    });
+
+                }, (xhr) => {
+                    console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+                }, (error) => {
+                    console.log(error)
+                }
+                );
+
+                // lights
+
+                // div_to_scene[div_id]["geo"].add( new THREE.HemisphereLight( 0x333333, 0x222222 ) );
+                // addShadowedLight(div_to_scene[div_id]["geo"], 1, 1, 1, 0xffffff, 1.35 );
+                // addShadowedLight(div_to_scene[div_id]["geo"],  0.5, 1, - 1, 0xffffff, 1 );
+
+                // renderer
+
+                renderer = new THREE.WebGLRenderer( { antialias: true } );
+                renderer.setPixelRatio( window.devicePixelRatio );
+                renderer.setSize( width, height);
+                renderer.outputEncoding = THREE.sRGBEncoding;
+                renderer.toneMapping = THREE.ACESFilmicToneMapping ;
+                renderer.toneMappingExposure = 0.6;
+                renderer.physicallyCorrectLights = true;
+
+                renderer.shadowMap.enabled = true;
+
+                // Environment map
+                let pmremGenerator = new THREE.PMREMGenerator(renderer);
+                pmremGenerator.compileEquirectangularShader();
+                
+                new RGBELoader().setDataType(THREE.FloatType).load('./envs/cyclorama.hdr', function (texture) {
+                    const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+                    div_to_scene[div_id]["color"].environment = envMap;
+                    div_to_scene[div_id]["geo"].environment = envMap;
+                    texture.dispose();
+                    pmremGenerator.dispose();
+                });
+
+                container.appendChild( renderer.domElement );
+                    
+                controls = new OrbitControls(camera, renderer.domElement)
+                controls.enableDamping = false
+                controls.enableZoom = false; // Disable zoom
+
+                // resize
+
+                window.addEventListener( 'resize', onWindowResize );
+            }
+
+            function onWindowResize() {
+                let width = container.clientWidth;
+                let height = container.clientHeight;
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize( width, height );
+            }
+
+            function animate() {
+                requestAnimationFrame( animate );
+                render();
+            }
+
+            function render() {
+                renderer.render( div_to_scene[div_id][render_colors ? "color" : "geo"], camera );
+                controls.update();
+            }
+
+            return controls;
+        }
+
+        function create_style_render_div(camera, div_id, mesh_path) {
+            let container;
+            let renderer, controls;
+
+            init();
+            animate();
+
+            function init() {
+
+                container = document.getElementById(div_id);
+                let width = container.parentElement.clientWidth;
+                let height = container.parentElement.clientHeight;
+
+
+                div_to_render_scene[div_id]["0"] = new THREE.Scene();
+                div_to_render_scene[div_id]["1"] = new THREE.Scene();
+                div_to_render_scene[div_id]["2"] = new THREE.Scene();
+                // div_to_render_scene[div_id]["0"].background = new THREE.Color( 0xffffff );
+                // div_to_render_scene[div_id]["1"].background = new THREE.Color( 0xffffff );
+                // div_to_render_scene[div_id]["2"].background = new THREE.Color( 0xffffff );
+                div_to_render_scene[div_id]["geo"] = new THREE.Scene();
+                div_to_render_scene[div_id]["geo"].background = new THREE.Color( 0xffffff );
+
+                const loader = new GLTFLoader();
+                ["0", "1", "2"].forEach(id => {
+                    loader.load(mesh_path, function (geometry) {
+                        let loaded_mesh = geometry.scene
+                        const axis = new THREE.Vector3(0, 1, 0); // Rotate around the Y axis
+                        const angle = Math.PI / 2; // 45 degrees rotation
+                        loaded_mesh.rotateOnAxis(axis, angle);
+                        div_to_render_scene[div_id][id].add( loaded_mesh );
+                        if (id === "0") {
+                            loaded_mesh.traverse(function (child) {
+                                if (child.isMesh) {
+                                    const geometry = child.geometry;
+                                    const material = new THREE.MeshStandardMaterial( { color: 0x444444, flatShading: true } )
+                                    const mesh = new THREE.Mesh(geometry, material);
+                                    mesh.rotateOnAxis(axis, angle);
+                                    div_to_render_scene[div_id]["geo"].add(mesh);
+                                }
+                            });
+                        }
+
+                    }, (xhr) => {
+                        console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+                    }, (error) => {
+                        console.log(error)
+                    }
+                    )
+                })
+
+                // div_to_render_scene[div_id]["geo"].add( new THREE.HemisphereLight( 0x333333, 0x222222 ) );
+                // addShadowedLight(div_to_render_scene[div_id]["geo"], 1, 1, 1, 0xffffff, 1.35 );
+                // addShadowedLight(div_to_render_scene[div_id]["geo"],  0.5, 1, - 1, 0xffffff, 1 );
+
+                // renderer
+
+                renderer = new THREE.WebGLRenderer( { antialias: true } );
+                renderer.setPixelRatio( window.devicePixelRatio );
+                renderer.setSize( width, height);
+                renderer.outputEncoding = THREE.sRGBEncoding;
+                renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                renderer.toneMappingExposure = 0.75;
+
+                renderer.shadowMap.enabled = true;
+
+                const env = {
+                    "0": "cyclorama.hdr",
+                    "1": "puresky.hdr",
+                    "2": "fireplace.hdr",
+                };
+
+                // Environment map
+                ["0", "1", "2"].forEach(id => {
+                    let pmremGenerator = new THREE.PMREMGenerator(renderer);
+                    pmremGenerator.compileEquirectangularShader();
+                    
+                    new RGBELoader().setDataType(THREE.FloatType).load('./envs/' + env[id], function (texture) {
+                        const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+                        div_to_render_scene[div_id][id].background = envMap;
+                        div_to_render_scene[div_id][id].environment = envMap;
+                        if (id === "0") {
+                            div_to_render_scene[div_id]["geo"].environment = envMap;
+                        }
+                        texture.dispose();
+                        pmremGenerator.dispose();
+                    });
+                })
+
+                container.appendChild( renderer.domElement );
+
+                controls = new OrbitControls(camera, renderer.domElement)
+                controls.enableDamping = false
+
+
+                // resize
+
+                window.addEventListener( 'resize', onWindowResize );
+
+        }
+            function onWindowResize() {
+                let width = container.clientWidth;
+                let height = container.clientHeight;
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize( width, height );
+            }
+            function animate() {
+                requestAnimationFrame( animate );
+                render();
+            }
+
+            function render() {
+                let scene = render_colors ? div_to_render_scene[div_id][style_id]: div_to_render_scene[div_id]["geo"]
+                renderer.render( scene, camera );
+                controls.update();
+            }
+
+            return controls;
+        }
+
+        function addShadowedLight(scene, x, y, z, color, intensity ) {
+
+            const directionalLight = new THREE.DirectionalLight( color, intensity );
+            directionalLight.position.set( x, y, z );
+            scene.add( directionalLight );
+
+            directionalLight.castShadow = true;
+
+            const d = 1;
+            directionalLight.shadow.camera.left = - d;
+            directionalLight.shadow.camera.right = d;
+            directionalLight.shadow.camera.top = d;
+            directionalLight.shadow.camera.bottom = - d;
+
+            directionalLight.shadow.camera.near = 1;
+            directionalLight.shadow.camera.far = 4;
+
+            directionalLight.shadow.mapSize.width = 1024;
+            directionalLight.shadow.mapSize.height = 1024;
+
+            directionalLight.shadow.bias = - 0.001;
+
+        }
+
+        document.addEventListener('keydown', logKey);
+
+        function logKey(evt) {
+            if (evt.keyCode === 71 && !mouse_button_down) {
+                switch_geometry()
+            }
+            if (evt.keyCode === 82 && !mouse_button_down) {
+                reset_orbit_controls()
+            }
+        }
+
+        function switch_geometry() {
+            render_colors = !render_colors
+        }
+
+        function reset_orbit_controls() {
+            list_of_orbit_controls.forEach(oc => {
+                oc.reset()
+            })
+        }
+
+        function set_style_0(){
+            style_id = "0"
+        }
+
+        function set_style_1(){
+            style_id = "1"
+        }
+
+        function set_style_2(){
+            style_id = "2"
+        }
+
+        function isMobile() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
+        }
+
+        document.body.onmousedown = function(evt) {
+            if (evt.button === 0)
+                mouse_button_down = true
+        }
+        document.body.onmouseup = function(evt) {
+            if (evt.button === 0)
+                mouse_button_down = false
+        }
+
+        window.onload = function() {
+            let slider = document.getElementsByClassName("slider")[0]
+            slider.removeAttribute("tabIndex")
+            // slider.addEventListener("mouseout", reset_orbit_controls);
+
+            if (!isMobile()) {
+                setup_render_divs("mesh_tt3d_0", './models/frog.glb')
+                setup_render_divs("mesh_tt3d_1", './models/cheese.glb')
+                setup_render_divs("mesh_tt3d_2", './models/train.glb')
+                setup_render_divs("mesh_tt3d_3", './models/pug.glb')
+
+                setup_render_divs("mesh_tt3d_4", './models/mouse_bust.glb')
+                setup_render_divs("mesh_tt3d_5", './models/goldentoilet.glb')
+                setup_render_divs("mesh_tt3d_6", './models/mushroom.glb')
+                setup_render_divs("mesh_tt3d_7", './models/sciencedog.glb')
+
+                setup_style_render_divs("mesh_env_0", './models/cat_plastic.glb')
+                setup_style_render_divs("mesh_env_1", './models/cat_rock.glb')
+                setup_style_render_divs("mesh_env_2", './models/cat_silver.glb')
+                setup_style_render_divs("mesh_env_3", './models/cat_rusted.glb')
+            } else {
+                document.getElementById("results-carousel-0").style.display = 'none';
+                document.getElementById("results-carousel-1").style.display = 'none';
+                document.getElementById("results-relight").style.display = 'none';
+                document.getElementById("message-help").innerHTML = "Please open this page on a non-mobile device to view the generated meshes."
+            }
+        };
+
+    </script>
+</body>
+
 </html>
