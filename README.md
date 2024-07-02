@@ -1,2 +1,2 @@
 # assetgen.github.io
-Website for Meta 3D AssetGen
+Please visit [https://assetgen.github.io/](https://assetgen.github.io/).
